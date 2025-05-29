@@ -1,0 +1,6 @@
+@UnionTherapyAPI_HostAddress = http://localhost:5207
+
+GET {{UnionTherapyAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

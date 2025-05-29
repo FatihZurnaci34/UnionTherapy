@@ -1,0 +1,25 @@
+using UnionTherapy.Domain.Common;
+
+namespace UnionTherapy.Domain.Entities;
+
+public class Notification : BaseEntity<Guid>
+{
+    public Guid UserId { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public string Content { get; set; } = string.Empty;
+    public string Type { get; set; } = string.Empty; // Email, SMS, Push etc.
+    public bool IsRead { get; set; } = false;
+    public DateTime? ReadDate { get; set; }
+    public bool IsSent { get; set; } = false;
+    public DateTime? SentDate { get; set; }
+    public string? ErrorMessage { get; set; }
+    public int RetryCount { get; set; } = 0;
+    
+    public Notification()
+    {
+        Id = Guid.NewGuid();
+    }
+    
+    // Navigation Properties
+    public virtual User User { get; set; } = null!;
+} 
