@@ -17,7 +17,10 @@ public class AuthServiceProfile : Profile
     public AuthServiceProfile()
     {
         CreateMap<LoginRequest, User>().ReverseMap();
-        CreateMap<RegisterRequest, User>().ReverseMap();
+        
+        CreateMap<RegisterRequest, User>()
+            .ForMember(dest => dest.PasswordHash, opt => opt.Ignore()); // Şifre ayrı işlenecek
+            
         CreateMap<User, LoginResponse>()
             .ForMember(dest => dest.AccessToken, opt => opt.Ignore())
             .ForMember(dest => dest.RefreshToken, opt => opt.Ignore())

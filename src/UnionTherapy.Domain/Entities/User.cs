@@ -11,7 +11,7 @@ public class User : BaseEntity<Guid>
     public string PasswordHash { get; set; } = string.Empty;
     public string? PhoneNumber { get; set; }
     public DateTime? DateOfBirth { get; set; }
-    public string? Gender { get; set; }
+    public Gender? Gender { get; set; }
     public UserRole Role { get; set; } = UserRole.User;
     public bool IsEmailVerified { get; set; } = false;
     public bool IsPhoneVerified { get; set; } = false;

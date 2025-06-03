@@ -20,6 +20,6 @@ namespace UnionTherapy.Application.Models.Auth.Request
         public string? Address { get; set; }
         public string? City { get; set; }
         public string? Country { get; set; }
-        public string? ProfileImageUrl { get; set; }
+        public string? ProfileImagePath { get; set; }
     }
 }

@@ -56,6 +56,28 @@ namespace UnionTherapy.Application.Services.AuthService
             return mappedResponse;
         }
 
+        public async Task Register(RegisterRequest request, CancellationToken cancellationToken = default)
+        {
+            // Email kontrolü
+            var existingUser = await _userRepository.GetAsync(x => x.Email == request.Email);
+            if (existingUser != null)
+                throw new("Bu email adresi zaten kullanılıyor");
+
+            // Şifre hashleme
+            string hashedPassword = HashingHelper.HashPasswordWithBCrypt(request.Password);
+
+            // AutoMapper ile RegisterRequest'ten User'a mapping
+            var user = _mapper.Map<User>(request);
+            
+            // Şifreyi ayrı olarak set et (mapping'de ignore edildi)
+            user.PasswordHash = hashedPassword;
+
+            await _userRepository.AddAsync(user);
+
+            return;
+        }
+
+
         public async Task<RefreshTokenResponse> RefreshToken(RefreshTokenRequest request, CancellationToken cancellationToken = default)
         {
             // 1. Süresi dolmuş access token'dan kullanıcı bilgilerini al
@@ -92,30 +114,6 @@ namespace UnionTherapy.Application.Services.AuthService
                 RefreshToken = newRefreshToken,
                 TokenExpiration = DateTime.UtcNow.AddHours(1)
             };
-        }
-
-        public async Task Register(RegisterRequest request, CancellationToken cancellationToken = default)
-        {
-            // Email kontrolü
-            var existingUser = await _userRepository.GetAsync(x => x.Email == request.Email);
-            if (existingUser != null)
-                throw new("Bu email adresi zaten kullanılıyor");
-
-            // Şifre hashleme
-            string hashedPassword = HashingHelper.HashPasswordWithBCrypt(request.Password);
-
-            var user = new User 
-            { 
-                Email = request.Email,
-                FirstName = request.FirstName,
-                LastName = request.LastName,
-                PasswordHash = hashedPassword,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            await _userRepository.AddAsync(user);
-
-            return;
         }
     }
 }

@@ -39,7 +39,8 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasMaxLength(20);
 
         builder.Property(u => u.Gender)
-            .HasMaxLength(10);
+            .HasConversion<string>()
+            .HasMaxLength(20);
 
         builder.Property(u => u.ProfileImagePath)
             .HasMaxLength(500);
