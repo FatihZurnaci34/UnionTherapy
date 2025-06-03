@@ -1,15 +1,18 @@
 using UnionTherapy.Domain.Common;
+using UnionTherapy.Domain.Enums;
 
 namespace UnionTherapy.Domain.Entities;
 
 public class Contract : BaseEntity<Guid>
 {
-    public string Name { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
     public string Content { get; set; } = string.Empty;
-    public string Type { get; set; } = string.Empty; // GDPR, User Agreement, Psychologist Agreement
+    public ContractType Type { get; set; }
+    public ContractStatus Status { get; set; } = ContractStatus.Draft;
     public string Version { get; set; } = "1.0";
-    public bool IsActive { get; set; } = true;
     public DateTime EffectiveDate { get; set; } = DateTime.UtcNow;
+    public DateTime? ExpiryDate { get; set; }
+    public Guid? PsychologistId { get; set; }
     
     public Contract()
     {
@@ -17,5 +20,6 @@ public class Contract : BaseEntity<Guid>
     }
     
     // Navigation Properties
+    public virtual Psychologist? Psychologist { get; set; }
     public virtual ICollection<UserContract> UserContracts { get; set; } = new List<UserContract>();
 } 

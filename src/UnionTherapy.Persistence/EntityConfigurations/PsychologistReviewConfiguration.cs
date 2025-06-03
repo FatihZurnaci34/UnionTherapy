@@ -9,7 +9,7 @@ public class PsychologistReviewConfiguration : IEntityTypeConfiguration<Psycholo
     public void Configure(EntityTypeBuilder<PsychologistReview> builder)
     {
         // Table name
-        builder.ToTable("PsychologistReviews");
+        builder.ToTable("PsychologistReviews", t => t.HasCheckConstraint("CK_PsychologistReviews_Rating", "Rating >= 1 AND Rating <= 5"));
 
         // Primary key
         builder.HasKey(pr => pr.Id);
@@ -49,9 +49,6 @@ public class PsychologistReviewConfiguration : IEntityTypeConfiguration<Psycholo
         builder.Property(pr => pr.CreatedAt)
             .IsRequired()
             .HasDefaultValueSql("NOW()");
-
-        // Constraints
-        builder.HasCheckConstraint("CK_PsychologistReviews_Rating", "Rating >= 1 AND Rating <= 5");
 
         // Indexes
         builder.HasIndex(pr => new { pr.PsychologistId, pr.UserId, pr.SessionId })

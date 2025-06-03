@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using UnionTherapy.Domain.Entities;
+using UnionTherapy.Domain.Enums;
 
 namespace UnionTherapy.Persistence.EntityConfigurations;
 
@@ -19,7 +20,7 @@ public class ContractConfiguration : IEntityTypeConfiguration<Contract>
             .IsRequired()
             .ValueGeneratedNever();
 
-        builder.Property(c => c.Name)
+        builder.Property(c => c.Title)
             .IsRequired()
             .HasMaxLength(200);
 
@@ -29,19 +30,27 @@ public class ContractConfiguration : IEntityTypeConfiguration<Contract>
 
         builder.Property(c => c.Type)
             .IsRequired()
-            .HasMaxLength(100);
+            .HasConversion<string>();
+
+        builder.Property(c => c.Status)
+            .IsRequired()
+            .HasConversion<string>()
+            .HasDefaultValue(ContractStatus.Draft);
 
         builder.Property(c => c.Version)
             .IsRequired()
             .HasMaxLength(20)
             .HasDefaultValue("1.0");
 
-        builder.Property(c => c.IsActive)
-            .HasDefaultValue(true);
-
         builder.Property(c => c.EffectiveDate)
             .IsRequired()
             .HasDefaultValueSql("NOW()");
+
+        builder.Property(c => c.ExpiryDate)
+            .IsRequired(false);
+
+        builder.Property(c => c.PsychologistId)
+            .IsRequired(false);
 
         builder.Property(c => c.IsDeleted)
             .HasDefaultValue(false);
@@ -54,13 +63,18 @@ public class ContractConfiguration : IEntityTypeConfiguration<Contract>
         builder.HasIndex(c => c.Type)
             .HasDatabaseName("IX_Contracts_Type");
 
-        builder.HasIndex(c => c.IsActive)
-            .HasDatabaseName("IX_Contracts_IsActive");
+        builder.HasIndex(c => c.Status)
+            .HasDatabaseName("IX_Contracts_Status");
 
         builder.HasIndex(c => c.EffectiveDate)
             .HasDatabaseName("IX_Contracts_EffectiveDate");
 
         // Relationships
+        builder.HasOne(c => c.Psychologist)
+            .WithMany()
+            .HasForeignKey(c => c.PsychologistId)
+            .OnDelete(DeleteBehavior.SetNull);
+
         builder.HasMany(c => c.UserContracts)
             .WithOne(uc => uc.Contract)
             .HasForeignKey(uc => uc.ContractId)

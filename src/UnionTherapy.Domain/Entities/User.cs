@@ -22,6 +22,10 @@ public class User : BaseEntity<Guid>
     public string? City { get; set; }
     public string? Country { get; set; } = "Turkey";
     
+    // Refresh Token alanları
+    public string? RefreshToken { get; set; }
+    public DateTime? RefreshTokenExpiry { get; set; }
+    
     public User()
     {
         Id = Guid.NewGuid();

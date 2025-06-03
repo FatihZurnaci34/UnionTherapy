@@ -8,6 +8,8 @@ public class UserContract : BaseEntity<Guid>
     public Guid ContractId { get; set; }
     public bool IsAccepted { get; set; } = false;
     public DateTime AcceptanceDate { get; set; } = DateTime.UtcNow;
+    public DateTime? SignedAt { get; set; }
+    public bool IsActive { get; set; } = true;
     public string IpAddress { get; set; } = string.Empty;
     public string UserAgent { get; set; } = string.Empty;
     

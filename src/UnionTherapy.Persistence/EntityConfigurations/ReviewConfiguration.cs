@@ -9,7 +9,7 @@ public class ReviewConfiguration : IEntityTypeConfiguration<Review>
     public void Configure(EntityTypeBuilder<Review> builder)
     {
         // Table name
-        builder.ToTable("Reviews");
+        builder.ToTable("Reviews", t => t.HasCheckConstraint("CK_Reviews_Rating", "Rating >= 1 AND Rating <= 5"));
 
         // Primary key
         builder.HasKey(r => r.Id);
@@ -43,9 +43,6 @@ public class ReviewConfiguration : IEntityTypeConfiguration<Review>
         builder.Property(r => r.CreatedAt)
             .IsRequired()
             .HasDefaultValueSql("NOW()");
-
-        // Constraints
-        builder.HasCheckConstraint("CK_Reviews_Rating", "Rating >= 1 AND Rating <= 5");
 
         // Indexes
         builder.HasIndex(r => new { r.SessionId, r.UserId })
