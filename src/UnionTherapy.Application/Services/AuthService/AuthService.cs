@@ -10,6 +10,7 @@ using UnionTherapy.Application.Repository;
 using UnionTherapy.Domain.Entities;
 using UnionTherapy.Application.Interfaces;
 using UnionTherapy.Application.Utilities;
+using UnionTherapy.Application.Exceptions;
 
 namespace UnionTherapy.Application.Services.AuthService
 {
@@ -32,11 +33,11 @@ namespace UnionTherapy.Application.Services.AuthService
             User? user = await _userRepository.GetAsync(x => x.Email == request.Email);
 
             if (user == null)
-                throw new("Mail bulunamadı");
+                throw new NotFoundException("Kullanıcı", request.Email);
 
             // Şifre kontrolü
             if (!HashingHelper.VerifyPasswordWithBCrypt(request.Password, user.PasswordHash))
-                throw new("Şifre yanlış");
+                throw new BusinessException("Şifre yanlış");
 
             // JWT token üret
             string accessToken = _jwtTokenGenerator.GenerateAccessToken(user);
@@ -61,15 +62,13 @@ namespace UnionTherapy.Application.Services.AuthService
             // Email kontrolü
             var existingUser = await _userRepository.GetAsync(x => x.Email == request.Email);
             if (existingUser != null)
-                throw new("Bu email adresi zaten kullanılıyor");
+                throw new BusinessException("Bu email adresi zaten kullanılıyor");
 
-            // Şifre hashleme
             string hashedPassword = HashingHelper.HashPasswordWithBCrypt(request.Password);
 
             // AutoMapper ile RegisterRequest'ten User'a mapping
             var user = _mapper.Map<User>(request);
-            
-            // Şifreyi ayrı olarak set et (mapping'de ignore edildi)
+
             user.PasswordHash = hashedPassword;
 
             await _userRepository.AddAsync(user);
@@ -85,19 +84,19 @@ namespace UnionTherapy.Application.Services.AuthService
             var userIdClaim = principal?.FindFirst("userId")?.Value;
             
             if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out Guid userId))
-                throw new("Geçersiz token");
+                throw new ValidationException("Geçersiz token formatı");
 
             // 2. Kullanıcıyı veritabanından bul
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
-                throw new("Kullanıcı bulunamadı");
+                throw new NotFoundException("Kullanıcı", userId);
 
             // 3. Refresh token'ı doğrula
             if (user.RefreshToken != request.RefreshToken)
-                throw new("Geçersiz refresh token");
+                throw new BusinessException("Geçersiz refresh token");
 
             if (user.RefreshTokenExpiry == null || user.RefreshTokenExpiry < DateTime.UtcNow)
-                throw new("Refresh token süresi dolmuş");
+                throw new BusinessException("Refresh token süresi dolmuş");
 
             // 4. Yeni tokenlar üret
             var newAccessToken = _jwtTokenGenerator.GenerateAccessToken(user);

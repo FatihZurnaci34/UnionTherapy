@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using UnionTherapy.Application.Models.Auth.Request;
 using UnionTherapy.Application.Models.Auth.Response;
 using UnionTherapy.Application.Services.AuthService;
+using UnionTherapy.Application.Utilities;
 
 namespace UnionTherapyAPI.Controllers
 {
@@ -17,45 +18,24 @@ namespace UnionTherapyAPI.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request)
+        public async Task<ActionResult> Login([FromBody] LoginRequest request)
         {
-            try
-            {
-                var response = await _authService.Login(request);
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            var response = await _authService.Login(request);
+            return Ok(ResponseHelper.Success(response));
         }
 
         [HttpPost("register")]
         public async Task<ActionResult> Register([FromBody] RegisterRequest request)
         {
-            try
-            {
-                await _authService.Register(request);
-                return Ok(new { message = "Kayıt başarılı" });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            await _authService.Register(request);
+            return Ok(ResponseHelper.Success());
         }
 
         [HttpPost("refresh")]
-        public async Task<ActionResult<RefreshTokenResponse>> RefreshToken([FromBody] RefreshTokenRequest request)
+        public async Task<ActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
         {
-            try
-            {
-                var response = await _authService.RefreshToken(request);
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            var response = await _authService.RefreshToken(request);
+            return Ok(ResponseHelper.Success(response));
         }
     }
 } 

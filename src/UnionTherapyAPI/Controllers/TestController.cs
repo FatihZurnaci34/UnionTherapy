@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using UnionTherapy.Application.Utilities;
 
 namespace UnionTherapyAPI.Controllers
 {
@@ -8,16 +9,18 @@ namespace UnionTherapyAPI.Controllers
     public class TestController : ControllerBase
     {
         [HttpGet("public")]
-        public ActionResult<object> PublicEndpoint()
+        public ActionResult PublicEndpoint()
         {
-            return Ok(new { 
+            var data = new { 
                 message = "Bu endpoint herkese açık", 
                 timestamp = DateTime.UtcNow 
-            });
+            };
+            
+            return Ok(ResponseHelper.Success(data));
         }
 
         [HttpGet("protected")]
-        public ActionResult<object> ProtectedEndpoint()
+        public ActionResult ProtectedEndpoint()
         {
             // Middleware tarafından doğrulanan kullanıcı bilgileri
             var userId = User.FindFirst("userId")?.Value;
@@ -25,7 +28,7 @@ namespace UnionTherapyAPI.Controllers
             var name = User.FindFirst(ClaimTypes.Name)?.Value;
             var role = User.FindFirst(ClaimTypes.Role)?.Value;
 
-            return Ok(new { 
+            var data = new { 
                 message = "Bu endpoint korumalı - JWT token gerekli",
                 user = new {
                     id = userId,
@@ -34,23 +37,27 @@ namespace UnionTherapyAPI.Controllers
                     role = role
                 },
                 timestamp = DateTime.UtcNow 
-            });
+            };
+
+            return Ok(ResponseHelper.Success(data));
         }
 
         [HttpGet("admin")]
-        public ActionResult<object> AdminEndpoint()
+        public ActionResult AdminEndpoint()
         {
             var role = User.FindFirst(ClaimTypes.Role)?.Value;
             
             if (role != "Admin")
             {
-                return Forbid("Bu endpoint sadece admin kullanıcılar için");
+                throw new UnauthorizedAccessException("Bu endpoint sadece admin kullanıcılar için");
             }
 
-            return Ok(new { 
+            var data = new { 
                 message = "Admin endpoint'ine hoş geldiniz",
                 timestamp = DateTime.UtcNow 
-            });
+            };
+
+            return Ok(ResponseHelper.Success(data));
         }
     }
 } 

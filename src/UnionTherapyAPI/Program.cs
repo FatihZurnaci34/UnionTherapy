@@ -13,6 +13,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+// Swagger UI için gerekli servisler
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 // Add Controllers
 builder.Services.AddControllers();
 
@@ -54,9 +58,14 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
+
+// ⚠️ ÖNEMLİ: Exception Middleware EN ÜSTTE OLMALI!
+app.UseMiddleware<ExceptionMiddleware>();
 
 // Custom Token Check Middleware (API katmanında)
 app.UseTokenCheck();
@@ -64,6 +73,9 @@ app.UseTokenCheck();
 // Built-in Authentication & Authorization (sonra bunlar)
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Ana sayfayı Swagger'a yönlendir
+app.MapGet("/", () => Results.Redirect("/swagger"));
 
 // Map controllers
 app.MapControllers();

@@ -4,6 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using UnionTherapy.Infrastructure.Utility.JWT;
+using UnionTherapy.Application.Utilities;
 
 namespace UnionTherapyAPI.Middlewares
 {
@@ -25,88 +26,67 @@ namespace UnionTherapyAPI.Middlewares
 
         public async Task InvokeAsync(HttpContext context)
         {
-            try
+            // Auth gerektirmeyen endpoint'ler
+            if (IsPublicEndpoint(context.Request.Path))
             {
-                // Auth gerektirmeyen endpoint'ler
-                if (IsPublicEndpoint(context.Request.Path))
-                {
-                    await _next(context);
-                    return;
-                }
-
-                var token = ExtractTokenFromHeader(context.Request);
-                
-                if (string.IsNullOrEmpty(token))
-                {
-                    await HandleUnauthorized(context, "Token bulunamadı");
-                    return;
-                }
-
-                var principal = ValidateToken(token);
-                
-                if (principal == null)
-                {
-                    await HandleUnauthorized(context, "Geçersiz token");
-                    return;
-                }
-
-                // Token geçerli, kullanıcı bilgilerini context'e ekle
-                context.User = principal;
-
                 await _next(context);
+                return;
             }
-            catch (Exception ex)
-            {
-                // Sadece beklenmeyen hatalar loglanır
-                _logger.LogError(ex, "Middleware kritik hatası");
-                await HandleUnauthorized(context, "Sistem hatası");
-            }
+
+            var token = ExtractTokenFromHeader(context.Request);
+            
+            if (string.IsNullOrEmpty(token))
+                throw new UnauthorizedAccessException("Token bulunamadı");
+
+            var principal = ValidateToken(token);
+            
+            if (principal == null)
+                throw new UnauthorizedAccessException("Geçersiz token");
+
+            // Token geçerli, kullanıcı bilgilerini context'e ekle
+            context.User = principal;
+
+            await _next(context);
         }
 
         private ClaimsPrincipal? ValidateToken(string token)
         {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_jwtOptions.SecretKey);
+
+            // Token formatını ve imzasını doğrula
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = true,
+                ValidIssuer = _jwtOptions.Issuer,
+                ValidateAudience = true,
+                ValidAudience = _jwtOptions.Audience,
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            };
+
             try
             {
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes(_jwtOptions.SecretKey);
-
-                // Token formatını ve imzasını doğrula
-                var validationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = true,
-                    ValidIssuer = _jwtOptions.Issuer,
-                    ValidateAudience = true,
-                    ValidAudience = _jwtOptions.Audience,
-                    ValidateLifetime = true,
-                    ClockSkew = TimeSpan.Zero
-                };
-
                 var principal = tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
 
                 // JWT token tipini kontrol et
                 if (validatedToken is not JwtSecurityToken jwtToken || 
                     !jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
                 {
-                    return null; // Geçersiz algoritma
+                    throw new SecurityTokenException("Geçersiz token algoritması");
                 }
 
-                return principal; // ✅ Geçerli token
+                return principal;
             }
             catch (SecurityTokenExpiredException)
             {
-                return null; // Token süresi dolmuş
+                throw new UnauthorizedAccessException("Token süresi dolmuş");
             }
-            catch (SecurityTokenException)
+            catch (SecurityTokenException ex)
             {
-                return null; // Token güvenlik hatası
-            }
-            catch (Exception ex)
-            {
-                // Sadece beklenmeyen hatalar loglanır
-                _logger.LogError(ex, "Token doğrulama sırasında beklenmeyen hata");
-                return null;
+                throw new UnauthorizedAccessException($"Token güvenlik hatası: {ex.Message}");
             }
         }
 
@@ -133,19 +113,14 @@ namespace UnionTherapyAPI.Middlewares
                 "/api/test/public",
                 "/weatherforecast",
                 "/swagger",
-                "/health"
+                "/swagger/index.html",
+                "/swagger/v1/swagger.json",
+                "/openapi/v1.json",
+                "/health",
+                "/"
             };
 
             return publicPaths.Any(p => path.StartsWithSegments(p, StringComparison.OrdinalIgnoreCase));
-        }
-
-        private async Task HandleUnauthorized(HttpContext context, string message)
-        {
-            context.Response.StatusCode = 401;
-            context.Response.ContentType = "application/json";
-            
-            var response = new { message = message, timestamp = DateTime.UtcNow };
-            await context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(response));
         }
     }
 
