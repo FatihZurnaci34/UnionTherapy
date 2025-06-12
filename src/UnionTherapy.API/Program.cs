@@ -11,6 +11,8 @@ using UnionTherapy.Application.Services.Localization;
 using UnionTherapy.Application.Exceptions;
 using UnionTherapy.Application.Constants;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,6 +55,29 @@ builder.Services.AddControllers();
 // Add HttpContextAccessor for localization
 builder.Services.AddHttpContextAccessor();
 
+// CORS Configuration
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        if (builder.Environment.IsDevelopment())
+        {
+            // Development'ta daha esnek
+            policy.AllowAnyOrigin()
+                  .AllowAnyMethod()
+                  .AllowAnyHeader();
+        }
+        else
+        {
+            // Production'da güvenli
+            policy.WithOrigins("https://yourdomain.com", "https://www.yourdomain.com")
+                  .AllowAnyMethod()
+                  .AllowAnyHeader()
+                  .AllowCredentials();
+        }
+    });
+});
+
 // Persistence services (PostgreSQL)
 builder.Services.AddPersistenceServices(builder.Configuration);
 
@@ -85,6 +110,45 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
+// Rate Limiting Configuration
+builder.Services.AddRateLimiter(options =>
+{
+    // Auth endpoints için daha sıkı limit
+    options.AddFixedWindowLimiter("AuthPolicy", opt =>
+    {
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.PermitLimit = 5; // Dakikada 5 istek
+        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        opt.QueueLimit = 2;
+    });
+
+    // Genel API endpoints için
+    options.AddFixedWindowLimiter("GeneralPolicy", opt =>
+    {
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.PermitLimit = 100; // Dakikada 100 istek
+        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        opt.QueueLimit = 10;
+    });
+
+    // Global fallback
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: context.User?.Identity?.Name ?? context.Request.Headers.Host.ToString(),
+            factory: partition => new FixedWindowRateLimiterOptions
+            {
+                AutoReplenishment = true,
+                PermitLimit = 200,
+                Window = TimeSpan.FromMinutes(1)
+            }));
+
+    options.OnRejected = async (context, token) =>
+    {
+        context.HttpContext.Response.StatusCode = 429;
+        await context.HttpContext.Response.WriteAsync("Rate limit exceeded. Please try again later.", cancellationToken: token);
+    };
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -103,6 +167,12 @@ if (!app.Environment.IsDevelopment())
 
 // ⚠️ ÖNEMLİ: Exception Middleware EN ÜSTTE OLMALI!
 app.UseMiddleware<ExceptionMiddleware>();
+
+// CORS - Rate limiting'den önce
+app.UseCors();
+
+// Rate Limiting
+app.UseRateLimiter();
 
 // Custom Token Check Middleware (API katmanında)
 app.UseTokenCheck();

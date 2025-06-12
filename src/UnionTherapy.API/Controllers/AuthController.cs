@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using UnionTherapy.Application.Models.Auth.Request;
 using UnionTherapy.Application.Models.Auth.Response;
 using UnionTherapy.Application.Services.AuthService;
@@ -18,6 +19,7 @@ namespace UnionTherapyAPI.Controllers
         }
 
         [HttpPost("login")]
+        [EnableRateLimiting("AuthPolicy")]
         public async Task<ActionResult> Login([FromBody] LoginRequest request)
         {
             var response = await _authService.Login(request);
@@ -25,6 +27,7 @@ namespace UnionTherapyAPI.Controllers
         }
 
         [HttpPost("register")]
+        [EnableRateLimiting("AuthPolicy")]
         public async Task<ActionResult> Register([FromBody] RegisterRequest request)
         {
             await _authService.Register(request);
@@ -32,6 +35,7 @@ namespace UnionTherapyAPI.Controllers
         }
 
         [HttpPost("refresh")]
+        [EnableRateLimiting("AuthPolicy")]
         public async Task<ActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
         {
             var response = await _authService.RefreshToken(request);

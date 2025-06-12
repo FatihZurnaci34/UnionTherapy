@@ -28,7 +28,7 @@ namespace UnionTherapy.Application.Utilities
             };
         }
 
-        public static Response<T> Fail<T>(string messageKey, T data = default)
+        public static Response<T> Fail<T>(string messageKey, T? data = default)
         {
             return new Response<T>
             {
@@ -48,7 +48,7 @@ namespace UnionTherapy.Application.Utilities
             };
         }
 
-        public static Response<T> FailWithParameters<T>(string messageKey, object[] parameters, T data = default)
+        public static Response<T> FailWithParameters<T>(string messageKey, object[] parameters, T? data = default)
         {
             return new Response<T>
             {

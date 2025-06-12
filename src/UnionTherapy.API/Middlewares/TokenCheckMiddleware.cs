@@ -54,7 +54,7 @@ namespace UnionTherapyAPI.Middlewares
         private ClaimsPrincipal? ValidateToken(string token)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_jwtOptions.SecretKey);
+            var key = Encoding.UTF8.GetBytes(_jwtOptions.SecretKey);
 
             // Token formatını ve imzasını doğrula
             var validationParameters = new TokenValidationParameters
@@ -86,9 +86,9 @@ namespace UnionTherapyAPI.Middlewares
             {
                 throw new LocalizedBusinessException(ResponseMessages.TokenExpired);
             }
-            catch (SecurityTokenException ex)
+            catch (SecurityTokenException)
             {
-                throw new LocalizedBusinessException(ResponseMessages.TokenSecurityError, ex.Message);
+                throw new LocalizedBusinessException(ResponseMessages.InvalidToken);
             }
         }
 

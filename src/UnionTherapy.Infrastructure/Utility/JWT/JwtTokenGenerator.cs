@@ -25,7 +25,7 @@ namespace UnionTherapy.Infrastructure.Utility.JWT
         public string GenerateAccessToken(User user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_jwtOptions.SecretKey);
+            var key = Encoding.UTF8.GetBytes(_jwtOptions.SecretKey);
 
             var claims = new List<Claim>
             {
@@ -64,7 +64,7 @@ namespace UnionTherapy.Infrastructure.Utility.JWT
                 ValidateAudience = false,
                 ValidateIssuer = false,
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_jwtOptions.SecretKey)),
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.SecretKey)),
                 ValidateLifetime = false
             };
 
@@ -83,7 +83,7 @@ namespace UnionTherapy.Infrastructure.Utility.JWT
             try
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes(_jwtOptions.SecretKey);
+                var key = Encoding.UTF8.GetBytes(_jwtOptions.SecretKey);
 
                 var validationParameters = new TokenValidationParameters
                 {

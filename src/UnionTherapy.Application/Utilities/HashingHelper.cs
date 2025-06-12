@@ -1,11 +1,11 @@
-using System;
-using System.Security.Cryptography;
-using System.Text;
 using UnionTherapy.Application.Exceptions;
 using UnionTherapy.Application.Constants;
 
 namespace UnionTherapy.Application.Utilities
 {
+    /// <summary>
+    /// Güvenli şifre hashleme işlemleri için BCrypt kullanır
+    /// </summary>
     public static class HashingHelper
     {
         /// <summary>

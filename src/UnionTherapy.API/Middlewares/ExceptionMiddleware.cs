@@ -31,7 +31,16 @@ namespace UnionTherapyAPI.Middlewares
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An unhandled exception occurred");
+                // Hassas bilgileri loglamaktan kaçın
+                var logMessage = ex switch
+                {
+                    LocalizedBusinessException => "Business logic exception occurred",
+                    LocalizedValidationException => "Validation exception occurred", 
+                    LocalizedNotFoundException => "Resource not found exception occurred",
+                    _ => "An unhandled exception occurred"
+                };
+                
+                _logger.LogError(ex, "{LogMessage} - Path: {Path}", logMessage, context.Request.Path);
                 await HandleExceptionAsync(context, ex);
             }
         }
@@ -53,15 +62,15 @@ namespace UnionTherapyAPI.Middlewares
             switch (exception)
             {
                 case LocalizedBusinessException ex:
-                    response.Message = localizationService.GetLocalizedString(ex.MessageKey, ex.Parameters);
+                    response.Message = localizationService.GetLocalizedString(ex.MessageKey, ex.Parameters ?? Array.Empty<object>());
                     break;
 
                 case LocalizedValidationException ex:
-                    response.Message = localizationService.GetLocalizedString(ex.MessageKey, ex.Parameters);
+                    response.Message = localizationService.GetLocalizedString(ex.MessageKey, ex.Parameters ?? Array.Empty<object>());
                     break;
 
                 case LocalizedNotFoundException ex:
-                    response.Message = localizationService.GetLocalizedString(ex.MessageKey, ex.Parameters);
+                    response.Message = localizationService.GetLocalizedString(ex.MessageKey, ex.Parameters ?? Array.Empty<object>());
                     break;
 
                 case BusinessException ex:

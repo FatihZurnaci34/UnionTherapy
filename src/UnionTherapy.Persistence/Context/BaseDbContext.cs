@@ -37,12 +37,13 @@ public class BaseDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        // Migration history table'ı doğru schema'da oluştur
+        // Migration history table'ı doğru schema'da oluştur ve timeout ayarla
         if (optionsBuilder.IsConfigured)
         {
             optionsBuilder.UseNpgsql(options =>
             {
                 options.MigrationsHistoryTable("__EFMigrationsHistory", "dev_schema");
+                options.CommandTimeout(30); // 30 saniye timeout
             });
         }
     }
