@@ -5,8 +5,9 @@ using UnionTherapy.Application.Services.PsychologistService;
 using UnionTherapy.Application.Services.PaymentService;
 using UnionTherapy.Application.Services.ReviewService;
 using UnionTherapy.Application.Services.NotificationService;
-
 using UnionTherapy.Application.Services.AuthService;
+using UnionTherapy.Application.Services.Localization;
+using UnionTherapy.Application.Utilities;
 
 namespace UnionTherapy.Application;
 
@@ -16,6 +17,9 @@ public static class ApplicationServiceRegistration
     {
         // AutoMapper registration
         services.AddAutoMapper(typeof(ApplicationServiceRegistration));
+        
+        // Localization Services
+        services.AddScoped<ILocalizationService, LocalizationService>();
 
         // Service registrations
         services.AddScoped<IAuthService , AuthService>();
@@ -25,7 +29,6 @@ public static class ApplicationServiceRegistration
         services.AddScoped<IPaymentService, PaymentService>();
         services.AddScoped<IReviewService, ReviewService>();
         services.AddScoped<INotificationService, NotificationService>();
-
 
         return services;
     }

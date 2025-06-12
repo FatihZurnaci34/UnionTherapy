@@ -5,6 +5,8 @@ using System.Security.Claims;
 using System.Text;
 using UnionTherapy.Infrastructure.Utility.JWT;
 using UnionTherapy.Application.Utilities;
+using UnionTherapy.Application.Exceptions;
+using UnionTherapy.Application.Constants;
 
 namespace UnionTherapyAPI.Middlewares
 {
@@ -36,12 +38,12 @@ namespace UnionTherapyAPI.Middlewares
             var token = ExtractTokenFromHeader(context.Request);
             
             if (string.IsNullOrEmpty(token))
-                throw new UnauthorizedAccessException("Token bulunamadı");
+                throw new LocalizedBusinessException(ResponseMessages.TokenNotFound);
 
             var principal = ValidateToken(token);
             
             if (principal == null)
-                throw new UnauthorizedAccessException("Geçersiz token");
+                throw new LocalizedBusinessException(ResponseMessages.InvalidToken);
 
             // Token geçerli, kullanıcı bilgilerini context'e ekle
             context.User = principal;
@@ -75,18 +77,18 @@ namespace UnionTherapyAPI.Middlewares
                 if (validatedToken is not JwtSecurityToken jwtToken || 
                     !jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
                 {
-                    throw new SecurityTokenException("Geçersiz token algoritması");
+                    throw new LocalizedBusinessException(ResponseMessages.InvalidTokenAlgorithm);
                 }
 
                 return principal;
             }
             catch (SecurityTokenExpiredException)
             {
-                throw new UnauthorizedAccessException("Token süresi dolmuş");
+                throw new LocalizedBusinessException(ResponseMessages.TokenExpired);
             }
             catch (SecurityTokenException ex)
             {
-                throw new UnauthorizedAccessException($"Token güvenlik hatası: {ex.Message}");
+                throw new LocalizedBusinessException(ResponseMessages.TokenSecurityError, ex.Message);
             }
         }
 

@@ -1,6 +1,8 @@
 using System;
 using System.Security.Cryptography;
 using System.Text;
+using UnionTherapy.Application.Exceptions;
+using UnionTherapy.Application.Constants;
 
 namespace UnionTherapy.Infrastructure.Utility.Security
 {
@@ -15,7 +17,7 @@ namespace UnionTherapy.Infrastructure.Utility.Security
         public static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
             if (string.IsNullOrWhiteSpace(password))
-                throw new ArgumentException("Şifre boş olamaz.", nameof(password));
+                throw new LocalizedValidationException(ResponseMessages.PasswordCannotBeEmpty);
 
             using var hmac = new HMACSHA512();
             passwordSalt = hmac.Key;
@@ -32,13 +34,13 @@ namespace UnionTherapy.Infrastructure.Utility.Security
         public static bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
         {
             if (string.IsNullOrWhiteSpace(password))
-                throw new ArgumentException("Şifre boş olamaz.", nameof(password));
+                throw new LocalizedValidationException(ResponseMessages.PasswordCannotBeEmpty);
 
             if (passwordHash.Length != 64)
-                throw new ArgumentException("Geçersiz şifre hash uzunluğu (64 byte bekleniyor).", nameof(passwordHash));
+                throw new LocalizedValidationException(ResponseMessages.InvalidPasswordHashLength);
 
             if (passwordSalt.Length != 128)
-                throw new ArgumentException("Geçersiz şifre salt uzunluğu (128 byte bekleniyor).", nameof(passwordSalt));
+                throw new LocalizedValidationException(ResponseMessages.InvalidPasswordSaltLength);
 
             using var hmac = new HMACSHA512(passwordSalt);
             var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
@@ -75,7 +77,7 @@ namespace UnionTherapy.Infrastructure.Utility.Security
         public static string HashPasswordWithBCrypt(string password)
         {
             if (string.IsNullOrWhiteSpace(password))
-                throw new ArgumentException("Şifre boş olamaz.", nameof(password));
+                throw new LocalizedValidationException(ResponseMessages.PasswordCannotBeEmpty);
 
             return BCrypt.Net.BCrypt.HashPassword(password);
         }
@@ -89,10 +91,10 @@ namespace UnionTherapy.Infrastructure.Utility.Security
         public static bool VerifyPasswordWithBCrypt(string password, string hashedPassword)
         {
             if (string.IsNullOrWhiteSpace(password))
-                throw new ArgumentException("Şifre boş olamaz.", nameof(password));
+                throw new LocalizedValidationException(ResponseMessages.PasswordCannotBeEmpty);
 
             if (string.IsNullOrWhiteSpace(hashedPassword))
-                throw new ArgumentException("Hash'lenmiş şifre boş olamaz.", nameof(hashedPassword));
+                throw new LocalizedValidationException(ResponseMessages.HashedPasswordCannotBeEmpty);
 
             return BCrypt.Net.BCrypt.Verify(password, hashedPassword);
         }

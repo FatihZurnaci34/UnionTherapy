@@ -1,0 +1,58 @@
+@UnionTherapyAPI_HostAddress = http://localhost:5000
+
+### Test Public Endpoint (Turkish - default)
+GET {{UnionTherapyAPI_HostAddress}}/api/test/public
+Accept: application/json
+
+### Test Public Endpoint (English)
+GET {{UnionTherapyAPI_HostAddress}}/api/test/public
+Accept: application/json
+X-Language: en
+
+### Test Public Endpoint (Turkish via query)
+GET {{UnionTherapyAPI_HostAddress}}/api/test/public?lang=tr
+Accept: application/json
+
+### Test Protected Endpoint (requires token)
+GET {{UnionTherapyAPI_HostAddress}}/api/test/protected
+Accept: application/json
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+### Test Error (Turkish)
+GET {{UnionTherapyAPI_HostAddress}}/api/test/test-error
+Accept: application/json
+
+### Test Error (English)
+GET {{UnionTherapyAPI_HostAddress}}/api/test/test-error
+Accept: application/json
+X-Language: en
+
+### Test Not Found (Turkish)
+GET {{UnionTherapyAPI_HostAddress}}/api/test/test-not-found
+Accept: application/json
+
+### Test Not Found (English)
+GET {{UnionTherapyAPI_HostAddress}}/api/test/test-not-found
+Accept: application/json
+X-Language: en
+
+### Auth Register
+POST {{UnionTherapyAPI_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "firstName": "Test",
+  "lastName": "User",
+  "email": "test@example.com",
+  "password": "Test123!",
+  "phoneNumber": "+905551234567"
+}
+
+### Auth Login
+POST {{UnionTherapyAPI_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "Test123!"
+}

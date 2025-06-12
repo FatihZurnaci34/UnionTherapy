@@ -8,6 +8,8 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using UnionTherapy.Domain.Entities;
 using UnionTherapy.Application.Interfaces;
+using UnionTherapy.Application.Exceptions;
+using UnionTherapy.Application.Constants;
 
 namespace UnionTherapy.Infrastructure.Utility.JWT
 {
@@ -68,10 +70,10 @@ namespace UnionTherapy.Infrastructure.Utility.JWT
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
-
+            
             if (securityToken is not JwtSecurityToken jwtSecurityToken || 
                 !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
-                throw new SecurityTokenException("Geçersiz token");
+                throw new LocalizedBusinessException(ResponseMessages.InvalidToken);
 
             return principal;
         }
@@ -83,7 +85,7 @@ namespace UnionTherapy.Infrastructure.Utility.JWT
                 var tokenHandler = new JwtSecurityTokenHandler();
                 var key = Encoding.ASCII.GetBytes(_jwtOptions.SecretKey);
 
-                tokenHandler.ValidateToken(token, new TokenValidationParameters
+                var validationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(key),
@@ -93,8 +95,9 @@ namespace UnionTherapy.Infrastructure.Utility.JWT
                     ValidAudience = _jwtOptions.Audience,
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero
-                }, out SecurityToken validatedToken);
+                };
 
+                tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
                 return true;
             }
             catch

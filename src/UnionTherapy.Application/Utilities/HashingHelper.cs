@@ -1,6 +1,8 @@
 using System;
 using System.Security.Cryptography;
 using System.Text;
+using UnionTherapy.Application.Exceptions;
+using UnionTherapy.Application.Constants;
 
 namespace UnionTherapy.Application.Utilities
 {
@@ -14,7 +16,7 @@ namespace UnionTherapy.Application.Utilities
         public static string HashPasswordWithBCrypt(string password)
         {
             if (string.IsNullOrWhiteSpace(password))
-                throw new ArgumentException("Şifre boş olamaz.", nameof(password));
+                throw new LocalizedValidationException(ResponseMessages.PasswordCannotBeEmpty);
 
             return BCrypt.Net.BCrypt.HashPassword(password);
         }
@@ -28,10 +30,10 @@ namespace UnionTherapy.Application.Utilities
         public static bool VerifyPasswordWithBCrypt(string password, string hashedPassword)
         {
             if (string.IsNullOrWhiteSpace(password))
-                throw new ArgumentException("Şifre boş olamaz.", nameof(password));
+                throw new LocalizedValidationException(ResponseMessages.PasswordCannotBeEmpty);
 
             if (string.IsNullOrWhiteSpace(hashedPassword))
-                throw new ArgumentException("Hash'lenmiş şifre boş olamaz.", nameof(hashedPassword));
+                throw new LocalizedValidationException(ResponseMessages.HashedPasswordCannotBeEmpty);
 
             return BCrypt.Net.BCrypt.Verify(password, hashedPassword);
         }

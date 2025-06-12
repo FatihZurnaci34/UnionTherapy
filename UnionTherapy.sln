@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnionTherapy.Application", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnionTherapy.Infrastructure", "src\UnionTherapy.Infrastructure\UnionTherapy.Infrastructure.csproj", "{0376B854-D8D5-4DD0-8F4B-C115F95B308A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnionTherapyAPI", "src\UnionTherapyAPI\UnionTherapyAPI.csproj", "{33EB5502-BC14-4D65-98BF-D112DC9F147A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnionTherapy.API", "src\UnionTherapy.API\UnionTherapy.API.csproj", "{33EB5502-BC14-4D65-98BF-D112DC9F147A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnionTherapy.Persistence", "src\UnionTherapy.Persistence\UnionTherapy.Persistence.csproj", "{1E38FDC3-68C3-4488-AC7C-18B17F3F1F32}"
 EndProject

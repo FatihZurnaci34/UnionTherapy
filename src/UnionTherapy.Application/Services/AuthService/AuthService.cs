@@ -11,6 +11,7 @@ using UnionTherapy.Domain.Entities;
 using UnionTherapy.Application.Interfaces;
 using UnionTherapy.Application.Utilities;
 using UnionTherapy.Application.Exceptions;
+using UnionTherapy.Application.Constants;
 
 namespace UnionTherapy.Application.Services.AuthService
 {
@@ -33,11 +34,11 @@ namespace UnionTherapy.Application.Services.AuthService
             User? user = await _userRepository.GetAsync(x => x.Email == request.Email);
 
             if (user == null)
-                throw new BusinessException("Giriş bilgileri hatalı");
+                throw new LocalizedBusinessException(ResponseMessages.InvalidCredentials);
 
             // Şifre kontrolü
             if (!HashingHelper.VerifyPasswordWithBCrypt(request.Password, user.PasswordHash))
-                throw new BusinessException("Giriş bilgileri hatalı");
+                throw new LocalizedBusinessException(ResponseMessages.InvalidCredentials);
 
             // JWT token üret
             string accessToken = _jwtTokenGenerator.GenerateAccessToken(user);
@@ -62,7 +63,7 @@ namespace UnionTherapy.Application.Services.AuthService
             // Email kontrolü
             var existingUser = await _userRepository.GetAsync(x => x.Email == request.Email);
             if (existingUser != null)
-                throw new BusinessException("Bu email adresi zaten kullanılıyor");
+                throw new LocalizedBusinessException(ResponseMessages.EmailAlreadyExists);
 
             string hashedPassword = HashingHelper.HashPasswordWithBCrypt(request.Password);
 
@@ -84,18 +85,18 @@ namespace UnionTherapy.Application.Services.AuthService
             var userIdClaim = principal?.FindFirst("userId")?.Value;
             
             if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out Guid userId))
-                throw new ValidationException("Geçersiz token formatı");
+                throw new LocalizedValidationException(ResponseMessages.InvalidTokenFormat);
 
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
-                throw new NotFoundException("Kullanıcı", userId);
+                throw new LocalizedNotFoundException(ResponseMessages.UserNotFound);
 
             // Refresh token'ı doğrula
             if (user.RefreshToken != request.RefreshToken)
-                throw new BusinessException("Geçersiz refresh token");
+                throw new LocalizedBusinessException(ResponseMessages.InvalidRefreshToken);
 
             if (user.RefreshTokenExpiry == null || user.RefreshTokenExpiry < DateTime.UtcNow)
-                throw new BusinessException("Refresh token süresi dolmuş");
+                throw new LocalizedBusinessException(ResponseMessages.RefreshTokenExpired);
 
             // 4. Yeni tokenlar üret
             var newAccessToken = _jwtTokenGenerator.GenerateAccessToken(user);
