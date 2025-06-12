@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using UnionTherapy.Application.Models.Auth.Request;
 using UnionTherapy.Application.Models.Auth.Response;
-using UnionTherapy.Application.Models.Contract.Request;
-using UnionTherapy.Application.Models.Contract.Response;
+
 using UnionTherapy.Domain.Entities;
 
 namespace UnionTherapy.Application.Mappings;

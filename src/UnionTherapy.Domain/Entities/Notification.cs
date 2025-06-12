@@ -1,4 +1,4 @@
-using UnionTherapy.Domain.Common;
+ using UnionTherapy.Domain.Common;
 using UnionTherapy.Domain.Enums;
 
 namespace UnionTherapy.Domain.Entities;

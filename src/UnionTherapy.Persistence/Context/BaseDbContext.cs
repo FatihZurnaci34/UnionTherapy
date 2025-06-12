@@ -20,14 +20,30 @@ public class BaseDbContext : DbContext
     public DbSet<PsychologistSpecialization> PsychologistSpecializations { get; set; }
     public DbSet<PsychologistDocument> PsychologistDocuments { get; set; }
     public DbSet<Notification> Notifications { get; set; }
-    public DbSet<Contract> Contracts { get; set; }
-    public DbSet<UserContract> UserContracts { get; set; }
+    public DbSet<UserAgreement> UserAgreements { get; set; }
+    public DbSet<UserAgreementAcceptance> UserAgreementAcceptances { get; set; }
+    public DbSet<PsychologistContract> PsychologistContracts { get; set; }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        
+         
+        // PostgreSQL schema ayarı
+        modelBuilder.HasDefaultSchema("dev_schema");
+          
         // Entity konfigürasyonlarını assembly'den uygula
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(BaseDbContext).Assembly);
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        // Migration history table'ı doğru schema'da oluştur
+        if (optionsBuilder.IsConfigured)
+        {
+            optionsBuilder.UseNpgsql(options =>
+            {
+                options.MigrationsHistoryTable("__EFMigrationsHistory", "dev_schema");
+            });
+        }
     }
 } 

@@ -5,10 +5,10 @@ namespace UnionTherapy.Domain.Entities;
 
 public class User : BaseEntity<Guid>
 {
-    public string FirstName { get; set; } = string.Empty;
-    public string LastName { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-    public string PasswordHash { get; set; } = string.Empty;
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    public string Email { get; set; }
+    public string PasswordHash { get; set; }
     public string? PhoneNumber { get; set; }
     public DateTime? DateOfBirth { get; set; }
     public Gender? Gender { get; set; }
@@ -38,5 +38,5 @@ public class User : BaseEntity<Guid>
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
     public virtual ICollection<PsychologistReview> PsychologistReviews { get; set; } = new List<PsychologistReview>();
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
-    public virtual ICollection<UserContract> UserContracts { get; set; } = new List<UserContract>();
+    public virtual ICollection<UserAgreementAcceptance> AgreementAcceptances { get; set; } = new List<UserAgreementAcceptance>();
 } 

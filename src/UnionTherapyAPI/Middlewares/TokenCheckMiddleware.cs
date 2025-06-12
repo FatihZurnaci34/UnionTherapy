@@ -111,7 +111,6 @@ namespace UnionTherapyAPI.Middlewares
                 "/api/auth/register", 
                 "/api/auth/refresh",
                 "/api/test/public",
-                "/weatherforecast",
                 "/swagger",
                 "/swagger/index.html",
                 "/swagger/v1/swagger.json",

@@ -34,4 +34,5 @@ public class Psychologist : BaseEntity<Guid>
     public virtual ICollection<PsychologistDocument> Documents { get; set; } = new List<PsychologistDocument>();
     public virtual ICollection<Session> Sessions { get; set; } = new List<Session>();
     public virtual ICollection<PsychologistReview> Reviews { get; set; } = new List<PsychologistReview>();
+    public virtual ICollection<PsychologistContract> Contracts { get; set; } = new List<PsychologistContract>();
 } 

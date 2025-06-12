@@ -26,8 +26,7 @@ public static class PersistenceServiceRegistration
         services.AddScoped<IReviewRepository, ReviewRepository>();
         services.AddScoped<IPsychologistReviewRepository, PsychologistReviewRepository>();
         services.AddScoped<INotificationRepository, NotificationRepository>();
-        services.AddScoped<IContractRepository, ContractRepository>();
-        services.AddScoped<IUserContractRepository, UserContractRepository>();
+
         services.AddScoped<ISessionParticipationRepository, SessionParticipationRepository>();
         services.AddScoped<IPsychologistDocumentRepository, PsychologistDocumentRepository>();
         services.AddScoped<IPsychologistSpecializationRepository, PsychologistSpecializationRepository>();

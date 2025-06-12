@@ -33,11 +33,11 @@ namespace UnionTherapy.Application.Services.AuthService
             User? user = await _userRepository.GetAsync(x => x.Email == request.Email);
 
             if (user == null)
-                throw new NotFoundException("Kullanıcı", request.Email);
+                throw new BusinessException("Giriş bilgileri hatalı");
 
             // Şifre kontrolü
             if (!HashingHelper.VerifyPasswordWithBCrypt(request.Password, user.PasswordHash))
-                throw new BusinessException("Şifre yanlış");
+                throw new BusinessException("Giriş bilgileri hatalı");
 
             // JWT token üret
             string accessToken = _jwtTokenGenerator.GenerateAccessToken(user);
@@ -86,12 +86,11 @@ namespace UnionTherapy.Application.Services.AuthService
             if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out Guid userId))
                 throw new ValidationException("Geçersiz token formatı");
 
-            // 2. Kullanıcıyı veritabanından bul
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
                 throw new NotFoundException("Kullanıcı", userId);
 
-            // 3. Refresh token'ı doğrula
+            // Refresh token'ı doğrula
             if (user.RefreshToken != request.RefreshToken)
                 throw new BusinessException("Geçersiz refresh token");
 

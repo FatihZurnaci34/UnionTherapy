@@ -36,9 +36,11 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasMaxLength(255);
 
         builder.Property(u => u.PhoneNumber)
+            .IsRequired()
             .HasMaxLength(20);
 
         builder.Property(u => u.Gender)
+            .IsRequired()
             .HasConversion<string>()
             .HasMaxLength(20);
 
@@ -114,9 +116,9 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasForeignKey(n => n.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasMany(u => u.UserContracts)
-            .WithOne(uc => uc.User)
-            .HasForeignKey(uc => uc.UserId)
+        builder.HasMany(u => u.AgreementAcceptances)
+            .WithOne(uaa => uaa.User)
+            .HasForeignKey(uaa => uaa.UserId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 } 

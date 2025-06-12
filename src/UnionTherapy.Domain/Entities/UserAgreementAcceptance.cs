@@ -2,23 +2,22 @@ using UnionTherapy.Domain.Common;
 
 namespace UnionTherapy.Domain.Entities;
 
-public class UserContract : BaseEntity<Guid>
+public class UserAgreementAcceptance : BaseEntity<Guid>
 {
     public Guid UserId { get; set; }
-    public Guid ContractId { get; set; }
+    public Guid UserAgreementId { get; set; }
     public bool IsAccepted { get; set; } = false;
     public DateTime AcceptanceDate { get; set; } = DateTime.UtcNow;
-    public DateTime? SignedAt { get; set; }
-    public bool IsActive { get; set; } = true;
     public string IpAddress { get; set; } = string.Empty;
     public string UserAgent { get; set; } = string.Empty;
+    public string AgreementVersion { get; set; } = string.Empty; // Kabul edilen sürüm
     
-    public UserContract()
+    public UserAgreementAcceptance()
     {
         Id = Guid.NewGuid();
     }
     
     // Navigation Properties
     public virtual User User { get; set; } = null!;
-    public virtual Contract Contract { get; set; } = null!;
+    public virtual UserAgreement UserAgreement { get; set; } = null!;
 } 

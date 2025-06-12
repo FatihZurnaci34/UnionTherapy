@@ -62,7 +62,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// HTTPS yönlendirmesi sadece production'da
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 // ⚠️ ÖNEMLİ: Exception Middleware EN ÜSTTE OLMALI!
 app.UseMiddleware<ExceptionMiddleware>();
@@ -74,34 +78,14 @@ app.UseTokenCheck();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Ana sayfayı Swagger'a yönlendir
-app.MapGet("/", () => Results.Redirect("/swagger"));
+// Ana sayfa yönlendirmesi sadece development'ta
+if (app.Environment.IsDevelopment())
+{
+    app.MapGet("/", () => Results.Redirect("/swagger"))
+       .ExcludeFromDescription();
+}
 
 // Map controllers
 app.MapControllers();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
-
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

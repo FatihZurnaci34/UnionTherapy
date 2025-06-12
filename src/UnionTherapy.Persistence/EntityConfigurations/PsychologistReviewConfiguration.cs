@@ -9,7 +9,7 @@ public class PsychologistReviewConfiguration : IEntityTypeConfiguration<Psycholo
     public void Configure(EntityTypeBuilder<PsychologistReview> builder)
     {
         // Table name
-        builder.ToTable("PsychologistReviews", t => t.HasCheckConstraint("CK_PsychologistReviews_Rating", "Rating >= 1 AND Rating <= 5"));
+        builder.ToTable("PsychologistReviews", t => t.HasCheckConstraint("CK_PsychologistReviews_Rating", "\"Rating\" >= 1 AND \"Rating\" <= 5"));
 
         // Primary key
         builder.HasKey(pr => pr.Id);
